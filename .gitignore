@@ -1,0 +1,28 @@
+# Datasets and large artifacts
+dataset_root/
+dataset_mini/
+dataset_root.zip
+processed_dataset_seq/
+
+# Model checkpoints and generated outputs
+models/
+output_video_model/
+test_output/
+*.ckpt
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.pkl
+
+# Python cache and logs
+__pycache__/
+*.pyc
+*.pyo
+*.log
+
+# Local tooling
+.env
+.venv/
+venv/
+
