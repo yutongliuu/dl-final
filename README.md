@@ -4,7 +4,7 @@
 
 ## 🗂️ 代码与大文件拆分策略
 
-> GitHub 仓库仅提交可复现的代码与配置；所有数据集、模型权重、训练输出统一托管在外部存储（Hugging Face Hub / OSS / 百度网盘），以避免 100GB 级别资产被推送到 GitHub。
+> GitHub 仓库仅提交可复现的代码与配置；所有数据集、模型权重、训练输出统一托管在外部存储（Hugging Face Hub），以避免 100GB 级别资产被推送到 GitHub。
 
 - `.gitignore` 已忽略以下目录/文件：`dataset_root/`、`dataset_mini/`、`processed_dataset_seq/`、`models/`、`output_video_model/`、`test_output/`、`dataset_root.zip` 等。开发者本地可照常使用这些目录，但在 Git 提交前无需关心其状态。
 - 若需要恢复或分享数据，请按照下面任一渠道下载，然后解压/覆写到对应路径即可。
@@ -13,57 +13,11 @@
 
 | 资产 | 描述 | 备注 |
 | --- | --- | --- |
-| `dataset_root` | 完整原始视频数据（train/val/test） | 上传 `dataset_root.zip` 并在 README 中记录版本 |
-| `processed_dataset_seq` | Arrow 多帧序列数据集 | 运行 `make_dataset.py` 后打包上传 |
-| `models/instruct-pix2pix`、`models/instruct-pix2pix-video-20frames` | 预训练 + 84 通道定制 UNet | 也可使用 `python download_model.py` 重新下载 |
-| `output_video_model/`、`test_output/` | 训练 checkpoint、TensorBoard 日志 | 仅保留最近若干版本 |
-| `dataset_mini/`、`dataset_root.zip` | 调试用迷你数据 & 数据压缩包 | 方便对外协作或无法访问 HF/OSS 的同学 |
+| `dataset_root` | 完整原始视频数据| https://huggingface.co/datasets/lyt0120/dl-final-dataset/tree/main|
+| `processed_dataset_seq` | Arrow 多帧序列数据集 | 运行 `make_dataset.py` 后获得 |
+| `models/instruct-pix2pix`、`models/instruct-pix2pix-video-20frames` | 预训练 + 84 通道定制 UNet |https://hf-mirror.com/lyt0120/dl-final-models/tree/main|
+| `output_video_model/`| 训练 checkpoint、TensorBoard 日志 | https://hf-mirror.com/lyt0120/dl-final-models/tree/main|
 
-> 将 `<org>`、`<bucket>`、`<share-id>` 等占位符替换为团队实际值；当外部链接变更时，请同步更新本节内容。
-
-### 下载方式示例
-
-#### 1. Hugging Face Hub（主渠道）
-
-```bash
-pip install huggingface_hub[cli]
-huggingface-cli login  # 使用拥有 <org>/dl-final-* 权限的账号
-export HF_ENDPOINT=https://hf-mirror.com  # 如需加速，可改为官方站点
-
-# 数据集
-huggingface-cli download <org>/dl-final-dataset \
-  --repo-type dataset \
-  --local-dir ./dataset_root_sync
-rsync -a dataset_root_sync/dataset_root ./dataset_root
-
-# 模型 / 检查点
-huggingface-cli download <org>/dl-final-models \
-  --local-dir ./models_sync \
-  --include "models/**" "output_video_model/**"
-rsync -a models_sync/models ./models
-rsync -a models_sync/output_video_model ./output_video_model
-```
-
-更多 Hugging Face 相关说明可参考 [`MODEL_DOWNLOAD.md`](MODEL_DOWNLOAD.md) 与 `download_model.py`。
-
-#### 2. 阿里云 OSS（内网备份）
-
-```bash
-# 首次使用需执行 ossutil config，填入 <bucket> 的 endpoint 与 AK 信息
-ossutil cp -r oss://<bucket>/dl-final/dataset_root ./dataset_root
-ossutil cp -r oss://<bucket>/dl-final/processed_dataset_seq ./processed_dataset_seq
-ossutil cp -r oss://<bucket>/dl-final/output_video_model ./output_video_model
-```
-
-#### 3. 百度网盘（便捷分享）
-
-```
-链接：https://pan.baidu.com/s/<share-id>
-提取码：<code>
-内容：dataset_root.zip、processed_dataset_seq.tar、output_video_model-checkpoint-***.zip
-```
-
-上述链接适用于无法访问 HF/OSS 的协作者，可根据需要替换为最新分享地址。
 
 ## 📊 项目进展
 
@@ -77,7 +31,7 @@ ossutil cp -r oss://<bucket>/dl-final/output_video_model ./output_video_model
 - [x] **模型准备**
   - 预训练模型已下载（使用 HF-Mirror 镜像站点）
   - 模型大小：约 2.4GB（包含 UNet, VAE, Text Encoder 等）
-  - 模型路径：`dl-final/models/instruct-pix2pix`
+  - 模型路径：`dl-final/models`
 
 - [x] **数据集准备**
   - 数据集已解压并整理（dataset_root.zip）
@@ -346,21 +300,8 @@ python prepare_test_data.py
 bash test_training.sh
 ```
 
-### 5. 使用 Python 启动视频训练（推荐）
 
-无需手动输入 `accelerate launch ...`，可直接运行：
-
-```bash
-python run_video_training.py
-```
-
-说明：
-- 脚本内部调用 `accelerate.notebook_launcher`，默认启动 4 个进程（可通过 `VIDEO_TRAIN_PROCESSES` 环境变量调整，如 `export VIDEO_TRAIN_PROCESSES=1`）。
-- 所有训练超参数集中在 `run_video_training.py` 的 `TRAINING_ARG_LIST` 中，可按需修改。
-- 启动时会强制把多进程模式切换为 `spawn`，避免 CUDA fork 子进程时报 “Cannot re-initialize CUDA in forked subprocess”。
-- 若需要恢复命令行用法，`train_video_ip2p.py` 仍然支持 `accelerate launch`。
-
-### 6. 完整训练
+### 6. 开启训练方式
 
 ```bash
 # 使用完整数据集进行训练
