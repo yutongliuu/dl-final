@@ -11,13 +11,13 @@
 
 ### 外部资产汇总
 
-| 资产 | 描述 | 推荐存储 | 备注 |
-| --- | --- | --- | --- |
-| `dataset_root` | 完整原始视频数据（train/val/test） | Hugging Face Datasets：`https://huggingface.co/datasets/<org>/dl-final-dataset` | 上传 `dataset_root.zip` 并在 README 中记录版本 |
-| `processed_dataset_seq` | Arrow 多帧序列数据集 | 同上（也可放 OSS） | 运行 `make_dataset.py` 后打包上传 |
-| `models/instruct-pix2pix`、`models/instruct-pix2pix-video-20frames` | 预训练 + 84 通道定制 UNet | Hugging Face Models：`https://huggingface.co/<org>/dl-final-models` | 也可使用 `python download_model.py` 重新下载 |
-| `output_video_model/`、`test_output/` | 训练 checkpoint、TensorBoard 日志 | OSS：`oss://<bucket>/dl-final/checkpoints/` | 仅保留最近若干版本 |
-| `dataset_mini/`、`dataset_root.zip` | 调试用迷你数据 & 数据压缩包 | 百度网盘分享链接 | 方便对外协作或无法访问 HF/OSS 的同学 |
+| 资产 | 描述 | 备注 |
+| --- | --- | --- |
+| `dataset_root` | 完整原始视频数据（train/val/test） | 上传 `dataset_root.zip` 并在 README 中记录版本 |
+| `processed_dataset_seq` | Arrow 多帧序列数据集 | 运行 `make_dataset.py` 后打包上传 |
+| `models/instruct-pix2pix`、`models/instruct-pix2pix-video-20frames` | 预训练 + 84 通道定制 UNet | 也可使用 `python download_model.py` 重新下载 |
+| `output_video_model/`、`test_output/` | 训练 checkpoint、TensorBoard 日志 | 仅保留最近若干版本 |
+| `dataset_mini/`、`dataset_root.zip` | 调试用迷你数据 & 数据压缩包 | 方便对外协作或无法访问 HF/OSS 的同学 |
 
 > 将 `<org>`、`<bucket>`、`<share-id>` 等占位符替换为团队实际值；当外部链接变更时，请同步更新本节内容。
 
