@@ -170,10 +170,6 @@ dl-final/
 │   ├── download_model.py           # 模型下载脚本（支持镜像站点）
 │   └── setup_mirror.sh             # HuggingFace 镜像站点设置脚本
 │
-├── src/                          # 源代码目录（可选）
-│   ├── dataset.py                 # 数据集处理模块
-│   └── train.py                   # 训练模块
-│
 ├── dataset_root/                 # 数据集根目录
 │   ├── metadata.json              # 数据集元数据（包含所有样本信息）
 │   ├── dataset_root.zip           # 数据集压缩包（原始数据）
